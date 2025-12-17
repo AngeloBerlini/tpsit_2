@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="rubrica">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="alunno" maxOccurs="unbounded"> <!--maxOccurs="unbounded" usato per mettere più alunni-->
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="nome" type="xs:string"/>
+              <xs:element name="voto_pratico" type="xs:integer"/>
+              <xs:element name="voto_teorico" type="xs:integer"/>
+              <xs:element name="media" type="xs:decimal"/>
+              <xs:element name="insufficiente">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="sì"/>
+                    <xs:enumeration value="no"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="commento" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

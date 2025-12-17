@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<rubrica>
+  <alunno>
+    <nome>Mario Casali</nome>
+    <voto_pratico>7</voto_pratico>
+    <voto_teorico>6</voto_teorico>
+    <media>6.5</media>
+    <insufficiente>no</insufficiente>
+    <commento>Discreta prova pratica; teoria sufficiente.</commento>
+  </alunno>
+  
+  <alunno>
+    <nome>Anna Peruch</nome>
+    <voto_pratico>4</voto_pratico>
+    <voto_teorico>5</voto_teorico>
+    <media>4.5</media>
+    <insufficiente>sì</insufficiente>
+    <commento>Entrambe le prove insufficienti.</commento>
+  </alunno>
+</rubrica>
