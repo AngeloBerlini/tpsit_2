@@ -1,0 +1,21 @@
+Presa a modello la struttura che trovate sul libro a pag. 102 
+(quella dei libri con autore, edizione, ecc.), effettuare:
+
+
+creazione di una pagina HTML con una form per inserire nuovi libri
+
+
+al submit (invio della form) creare/modificare un file .json ben strutturato secondo le regole
+viste a lezione contenente una collezione di libri
+(quindi ad ogni invio si aggiunge un libro alla biblioteca)
+
+
+visualizzare successivamente su una nuova pagina HTML il contenuto del JSON (la biblioteca)
+in formato tabellare
+
+
+OPZIONALE
+uso dei CSS (formattazione ad esempio del colore del carattere, del font, del peso, ecc.)
+controlli in javascript
+
+NB: la lettura/scrittura del file .json va fatta in javascript e in locale
