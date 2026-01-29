@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Biblioteca</h1>
+    <table border="1" id="tabellaLibri">
+        <thead>
+            <tr>
+                <th>Autore</th>
+                <th>Titolo</th>
+                <th>Edizione</th>
+                <th>Anno</th>
+                <th>ISBN</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        async function caricaLibri() {
+            const res = await fetch('/libri.json');
+            const data = await res.json();
+            const tbody = document.querySelector('#tabellaLibri tbody');
+
+            data.libri.forEach(libro => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${libro.autore}</td>
+                    <td>${libro.titolo}</td>
+                    <td>${libro.edizione}</td>
+                    <td>${libro.anno}</td>
+                    <td>${libro.isbn}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        caricaLibri();
+    </script>
+</body>
+</html>
