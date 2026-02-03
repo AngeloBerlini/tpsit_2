@@ -1,44 +1,138 @@
 <!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <title>Biblioteca</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<html>
+	<head>
+		<TITLE>La mia prima pagina</title>
+		<meta name="description" content="questa è la mia prima pagina, spero che non ci siano troppi errori!">
+		<style>
+			input, select {
+				display:flex;
+				margin: 10px 0 10px 0;
+				width: 200px;
+				height: 30mpx;
+			}
+		</style>
+	</head>
+	<body>
     <h1>Biblioteca</h1>
-    <table border="1" id="tabellaLibri">
-        <thead>
-            <tr>
-                <th>Autore</th>
-                <th>Titolo</th>
-                <th>Edizione</th>
-                <th>Anno</th>
-                <th>ISBN</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+		
+		<!-- creazione della form -->
+		<form class="form" id="form1" method="POST" onsubmit="salva_dati(event)">
+            <label>Inserisci il titolo del libro :</label>
+			<input name="titolo_libro" type="text" placeholder="inserisci qui il titolo del libro">
+            <label>Inserisci l'autore del libro :</label>
+			<input name="autore_libro" type="text" placeholder="inserisci qui l'autore del libro">
+            <label>Inserisci la casa editrice del libro :</label>
+			<input name="casa_editrice_libro" type="text" placeholder="inserisci qui la casa editrice">
+            <label>Seleziona il genere del libro :</label>
+			<select name="genere">
+				<option value="narrativa">narrativa</option>
+				<option value="fantasy">libro di fantasy</option>
+				<option value="giallo">giallo</option>
+                <option value="horror">horror</option>
+			</select>
+			<label>Carica un file JSON :</label>
+			<input id="fileInput" type="file" accept="application/json,.json" />
+			<input type="submit" value="INVIA"/>
+		</form>
 
-    <script>
-        async function caricaLibri() {
-            const res = await fetch('/libri.json');
-            const data = await res.json();
-            const tbody = document.querySelector('#tabellaLibri tbody');
+		<h2>Elenco libri</h2>
+		<ul id="bookList"></ul>
+	</BODY>
 
-            data.libri.forEach(libro => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${libro.autore}</td>
-                    <td>${libro.titolo}</td>
-                    <td>${libro.edizione}</td>
-                    <td>${libro.anno}</td>
-                    <td>${libro.isbn}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-        caricaLibri();
-    </script>
-</body>
+	<script>
+		// array in memoria con tutti i libri attualmente visualizzati
+		var allBooks = [];
+
+		// render della lista dei libri nella pagina
+		function renderBooks() {
+			var container = document.getElementById('bookList');
+			if (!container) return;
+			if (!allBooks || allBooks.length === 0) {
+				container.innerHTML = '<li>(nessun libro)</li>';
+				return;
+			}
+			// crea markup semplice
+			container.innerHTML = allBooks.map(function(b, idx) {
+				var titolo = b.libro || b.titolo || '(titolo mancante)';
+				var autore = b.autore || '(autore mancante)';
+				var casa = b.casa_editrice || b.casa || '(casa editrice)';
+				var genere = b.genere || '(genere)';
+				return '<li><strong>' + escapeHtml(titolo) + '</strong> — ' + escapeHtml(autore) + ' (' + escapeHtml(casa) + ') — <em>' + escapeHtml(genere) + '</em></li>';
+			}).join('\n');
+		}
+
+		// funzione di utilità per prevenire XSS semplice
+		function escapeHtml(str) {
+			if (!str) return '';
+			return String(str).replace(/[&<>"']/g, function(m) {
+				return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m];
+			});
+		}
+
+		function salva_dati(event) {
+			// evita il comportamento di submit della form
+			if (event && event.preventDefault) event.preventDefault();
+
+			var form = document.getElementById("form1");
+			var data = new FormData(form);
+
+			var book = { // oggetto json "book"
+				"libro": data.get("titolo_libro"),
+				"autore": data.get("autore_libro"),
+				"casa_editrice": data.get("casa_editrice_libro"),
+				"genere": data.get("genere")
+			};
+
+			// aggiunge al dataset in memoria e renderizza
+			allBooks.push(book);
+			renderBooks();
+
+			// reset form
+			if (form && form.reset) form.reset();
+
+			// log per debugging
+			console.log('Libro aggiunto:', book);
+		}
+
+		// Gestione caricamento file JSON
+		document.addEventListener('DOMContentLoaded', function() {
+			var fileInput = document.getElementById('fileInput');
+			// render iniziale
+			renderBooks();
+
+			if (!fileInput) return;
+
+			fileInput.addEventListener('change', function(evt) {
+				var file = evt.target.files && evt.target.files[0];
+				if (!file) return;
+
+				var reader = new FileReader();
+				reader.onload = function(e) {
+					try {
+						var content = e.target.result;
+						var parsed = JSON.parse(content);
+						console.log('File JSON caricato:', parsed);
+
+						// se ha un array books, lo uniamo (merge) a allBooks
+						if (parsed && Array.isArray(parsed.books)) {
+							allBooks = allBooks.concat(parsed.books);
+							renderBooks();
+							alert('File importato: ' + parsed.books.length + ' libri (uniti ai libri esistenti)');
+						} else if (Array.isArray(parsed)) {
+							// se il file è direttamente un array di libri
+							allBooks = allBooks.concat(parsed);
+							renderBooks();
+							alert('File importato: ' + parsed.length + ' elementi (array)');
+						} else {
+							alert('File JSON importato ma la struttura non contiene un array `books`. Controlla la console.');
+						}
+					} catch (err) {
+						console.error('Errore parsing JSON:', err);
+						alert('Errore durante il parsing del file JSON: ' + err.message);
+					}
+				};
+				reader.readAsText(file);
+			});
+		});
+	</script>
 </html>
