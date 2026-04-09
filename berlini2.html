@@ -1,0 +1,238 @@
+<!--Creare una form per la registrazione di studenti in cui vi siano i seguenti campi da validare:
+nome
+cognome
+data di nascita
+codice fiscale
+scelta multipla classe
+scelta multipla sezione
+checkbox ripetente
+anni ripetuti
+scelta multipla uscita (lavoro, università, ...)
+bottone di submit
+All'invio effettuare la validazione compatibilmente con i campi.
+Se la form viene validata mostrare una pagina html (url a vostra scelta) con il JSON generato dai dati raccolti, altrimenti aggiungere un bordo rosso intorno al campo non validato e scrivere in un div posizionato dopo il bottone di submit campo e errore rilevato.-->
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Registrazione Studente</title>
+	<style>
+		body{font-family: Arial, Helvetica, sans-serif;max-width:900px;margin:30px auto;padding:0 16px}
+		label{display:block;margin-top:12px;font-weight:600}
+		input[type="text"], input[type="date"], input[type="number"], select, textarea{width:100%;padding:8px;margin-top:6px;box-sizing:border-box}
+		.controls{margin-top:12px}
+		.invalid{border:2px solid #d9534f !important}
+		.error-list{color:#d9534f;margin-top:12px;padding:10px;border-radius:4px;background:#fff0f0}
+		.hint{font-size:0.9em;color:#666}
+		.row{display:flex;gap:12px}
+		.col{flex:1}
+		.small{width:140px}
+		button{margin-top:14px;padding:10px 16px;font-size:1rem}
+	</style>
+</head>
+<body>
+	<h1>Registrazione Studente</h1>
+	<form id="regForm" novalidate>
+		<div class="row">
+			<div class="col">
+				<label for="nome">Nome *</label>
+				<input id="nome" name="nome" type="text" required />
+			</div>
+			<div class="col">
+				<label for="cognome">Cognome *</label>
+				<input id="cognome" name="cognome" type="text" required />
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col small">
+				<label for="dataNascita">Data di nascita *</label>
+				<input id="dataNascita" name="dataNascita" type="date" required />
+			</div>
+			<div class="col">
+				<label for="codiceFiscale">Codice Fiscale *</label>
+				<input id="codiceFiscale" name="codiceFiscale" type="text" maxlength="16" placeholder="16 caratteri" required />
+				<div class="hint">Inserire 16 caratteri alfanumerici (es. RSSMRA85M01H501U)</div>
+			</div>
+		</div>
+
+		<label for="classi">Classe (selezione multipla) *</label>
+		<select id="classi" name="classi" multiple size="4" required>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+		</select>
+
+		<label for="sezioni">Sezione (selezione multipla) *</label>
+		<select id="sezioni" name="sezioni" multiple size="4" required>
+			<option value="A">A</option>
+			<option value="B">B</option>
+			<option value="C">C</option>
+			<option value="D">D</option>
+		</select>
+
+		<div style="margin-top:12px">
+			<label><input id="ripetente" name="ripetente" type="checkbox" /> Ripetente</label>
+		</div>
+
+		<label for="anniRipetuti">Anni ripetuti (se ripetente)</label>
+		<input id="anniRipetuti" name="anniRipetuti" type="number" min="1" max="10" placeholder="es. 1" />
+
+		<label>Uscita prevista (scelta multipla) *</label>
+		<div class="controls">
+			<label><input type="checkbox" name="uscita" value="lavoro" /> Lavoro</label>
+			<label><input type="checkbox" name="uscita" value="universita" /> Università</label>
+			<label><input type="checkbox" name="uscita" value="stage" /> Stage</label>
+			<label><input type="checkbox" name="uscita" value="altro" /> Altro</label>
+		</div>
+
+		<div>
+			<button id="submitBtn" type="submit">Invia</button>
+		</div>
+
+			<div id="errors" class="error-list" aria-live="polite" style="display:none"></div>
+		</form>
+
+		<div id="result" style="display:none;margin-top:18px">
+			<h2>Dati registrazione (JSON)</h2>
+			<pre id="json" style="background:#f6f8fa;padding:12px;border-radius:6px;overflow:auto"></pre>
+			<div style="margin-top:12px">
+				<button id="editBtn" type="button">Modifica dati</button>
+			</div>
+		</div>
+
+		<script>
+			(function(){
+			const form = document.getElementById('regForm');
+			const errorsDiv = document.getElementById('errors');
+
+			function setInvalid(el, isInvalid){
+				if(!el) return;
+				if(isInvalid) el.classList.add('invalid'); else el.classList.remove('invalid');
+			}
+
+			function getSelectedValues(select){
+				if(!select) return [];
+				return Array.from(select.options).filter(o=>o.selected).map(o=>o.value);
+			}
+
+			function getCheckedValues(name){
+				return Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(i=>i.value);
+			}
+
+			function validate(){
+				const errs = [];
+				// fields
+				const nome = document.getElementById('nome');
+				const cognome = document.getElementById('cognome');
+				const dataNascita = document.getElementById('dataNascita');
+				const codiceFiscale = document.getElementById('codiceFiscale');
+				const classi = document.getElementById('classi');
+				const sezioni = document.getElementById('sezioni');
+				const ripetente = document.getElementById('ripetente');
+				const anniRipetuti = document.getElementById('anniRipetuti');
+
+				// reset visuals
+				[nome,cognome,dataNascita,codiceFiscale,classi,sezioni,anniRipetuti].forEach(el=>setInvalid(el,false));
+				errorsDiv.style.display='none';
+				errorsDiv.innerHTML='';
+
+				// nome/cognome required
+				if(!nome.value.trim()) errs.push({field:nome, msg:'nome: obbligatorio'});
+				if(!cognome.value.trim()) errs.push({field:cognome, msg:'cognome: obbligatorio'});
+
+				// data di nascita: required and must be in the past
+				if(!dataNascita.value) errs.push({field:dataNascita, msg:'data di nascita: obbligatoria'});
+				else {
+					const d = new Date(dataNascita.value);
+					const today = new Date();
+					if(isNaN(d.getTime()) || d >= today) errs.push({field:dataNascita, msg:'data di nascita: deve essere una data valida precedente a oggi'});
+				}
+
+				// codice fiscale: 16 alfanumerici
+				const cfVal = codiceFiscale.value.trim().toUpperCase();
+				if(!cfVal) errs.push({field:codiceFiscale, msg:'codice fiscale: obbligatorio'});
+				else if(!/^[A-Z0-9]{16}$/.test(cfVal)) errs.push({field:codiceFiscale, msg:'codice fiscale: deve contenere 16 caratteri alfanumerici'});
+
+				// classi/sezioni: at least one selected
+				const selectedClassi = getSelectedValues(classi);
+				const selectedSezioni = getSelectedValues(sezioni);
+				if(selectedClassi.length===0) errs.push({field:classi, msg:'classe: selezionare almeno una'});
+				if(selectedSezioni.length===0) errs.push({field:sezioni, msg:'sezione: selezionare almeno una'});
+
+				// ripetente -> anni ripetuti required and positive
+				if(ripetente.checked){
+					if(!anniRipetuti.value) errs.push({field:anniRipetuti, msg:'anni ripetuti: obbligatorio se ripetente'});
+					else {
+						const n = Number(anniRipetuti.value);
+						if(!Number.isInteger(n) || n<1) errs.push({field:anniRipetuti, msg:'anni ripetuti: deve essere un intero >= 1'});
+					}
+				}
+
+				// uscita: at least one
+				const uscite = getCheckedValues('uscita');
+				if(uscite.length===0) errs.push({field:document.querySelector('input[name="uscita"]'), msg:'uscita: selezionare almeno una opzione'});
+
+				return errs;
+			}
+
+			form.addEventListener('submit', function(ev){
+				ev.preventDefault();
+				const errs = validate();
+				if(errs.length>0){
+					// mark fields and show messages
+					errs.forEach(e=>setInvalid(e.field,true));
+					errorsDiv.style.display='block';
+					errorsDiv.innerHTML = '<strong>Errori rilevati:</strong><ul>' + errs.map(e=>'<li>'+escapeHtml(e.msg)+'</li>').join('') + '</ul>';
+					// focus first invalid
+					if(errs[0] && errs[0].field && typeof errs[0].field.focus === 'function') errs[0].field.focus();
+					return;
+				}
+
+				// collect data
+				const nome = document.getElementById('nome').value.trim();
+				const cognome = document.getElementById('cognome').value.trim();
+				const dataNascita = document.getElementById('dataNascita').value;
+				const codiceFiscale = document.getElementById('codiceFiscale').value.trim().toUpperCase();
+				const classi = getSelectedValues(document.getElementById('classi'));
+				const sezioni = getSelectedValues(document.getElementById('sezioni'));
+				const ripetente = document.getElementById('ripetente').checked;
+				const anniRipetuti = document.getElementById('anniRipetuti').value ? Number(document.getElementById('anniRipetuti').value) : 0;
+				const uscite = getCheckedValues('uscita');
+
+				const payload = {
+					nome, cognome, dataNascita, codiceFiscale, classi, sezioni, ripetente, anniRipetuti, uscite
+				};
+
+				// show JSON in the same page (single-file mode)
+				try{
+					const jsonPre = document.getElementById('json');
+					jsonPre.textContent = JSON.stringify(payload, null, 4);
+					// hide form and show result
+					form.style.display = 'none';
+					document.getElementById('result').style.display = 'block';
+					// setup edit button to go back to the form
+					const editBtn = document.getElementById('editBtn');
+					editBtn.addEventListener('click', function(){
+						document.getElementById('result').style.display = 'none';
+						form.style.display = '';
+					});
+				}catch(err){
+					errorsDiv.style.display='block';
+					errorsDiv.innerHTML = 'Errore generazione JSON: ' + String(err);
+				}
+			});
+
+			function escapeHtml(s){
+				return String(s).replace(/[&<>\\"]/g, function(c){
+					return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+				});
+			}
+		})();
+	</script>
+</body>
+</html>
