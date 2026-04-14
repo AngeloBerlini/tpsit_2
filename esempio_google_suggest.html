@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ricerca semplice (locale)</title>
+    <style>
+        body{font-family: sans-serif; padding:12px}
+        input{padding:6px; width:100%; box-sizing:border-box}
+        #risposta div{padding:6px; border-top:1px solid #eee; cursor:pointer}
+        #risposta div:hover{background:#f5f5f5}
+    </style>
+</head>
+<body>
+    <label for="q">Nome: </label>
+    <input id="q" type="text" onkeyup="mostra(this.value)" autocomplete="off">
+    <div id="risposta"></div>
+
+    <script>
+        // Lista locale di nomi (in un esempio reale la ricerca può avvenire sul server)
+        const NAMES = [
+            "Alessandro","Alice","Andrea","Angela","Anna","Antonio","Beatrice","Bruno",
+            "Carlo","Caterina","Chiara","Claudio","Daniele","Davide","Elena","Emma","Enrico",
+            "Federica","Federico","Francesca","Gabriele","Giulia","Giuseppe","Giorgia","Giorgio",
+            "Luca","Lucia","Laura","Leonardo","Lorenzo","Ludovica","Marco","Maria","Martina",
+            "Matteo","Michele","Nicola","Paolo","Pietro","Roberta","Roberto","Sara","Simone",
+            "Stefano","Valentina","Valerio","Vittoria"
+        ];
+
+        // funzione semplice: filtra la lista locale e scrive risultati in #risposta
+        function mostra(str){
+            const out = document.getElementById('risposta');
+            if (!str || str.trim().length === 0){ out.innerHTML = ''; return; }
+            const q = str.trim().toLowerCase();
+            const matches = NAMES.filter(n => n.toLowerCase().includes(q));
+            if (matches.length === 0){ out.innerHTML = '<div><em>Nessun risultato</em></div>'; return; }
+            out.innerHTML = matches.map(m => '<div onclick="fill(\'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+        }
+
+        function fill(name){
+            document.getElementById('q').value = name;
+            document.getElementById('risposta').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
+
