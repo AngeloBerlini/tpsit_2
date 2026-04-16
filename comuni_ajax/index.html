@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ricerca Comuni Italiani</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --verde: #1a472a;
+      --verde-chiaro: #2d6a4f;
+      --oro: #c9a84c;
+      --panna: #f5f0e8;
+      --testo: #1c1c1c;
+      --grigio: #7a7a6e;
+      --bordo: #d0c9b8;
+    }
+
+    body {
+      background: var(--panna);
+      color: var(--testo);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Header striscia */
+    header {
+      width: 100%;
+      background: var(--verde);
+      color: var(--panna);
+      text-align: center;
+      padding: 2.5rem 1rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 20px,
+        rgba(201,168,76,0.06) 20px,
+        rgba(201,168,76,0.06) 21px
+      );
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      position: relative;
+    }
+
+    header h1 span {
+      color: var(--oro);
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.6);
+      position: relative;
+    }
+
+    /* Striscia oro decorativa */
+    .stripe {
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--verde), var(--oro), var(--verde));
+    }
+
+    /* Card principale */
+    .card {
+      width: min(680px, 95vw);
+      margin: 3rem auto;
+      background: #fff;
+      border: 1px solid var(--bordo);
+      box-shadow: 6px 6px 0 var(--verde), 12px 12px 0 var(--oro);
+      padding: 2.5rem 2rem;
+    }
+
+    .label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--grigio);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 3rem;
+      border: 2px solid var(--bordo);
+      background: var(--panna);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1rem;
+      color: var(--testo);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrap input:focus {
+      border-color: var(--verde);
+    }
+
+    .input-wrap input::placeholder {
+      color: #b0a898;
+    }
+
+    .input-wrap .icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+
+    /* Indicatore loading */
+    .loading {
+      display: none;
+      font-size: 0.7rem;
+      color: var(--oro);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .loading.visible { display: block; }
+
+    /* Contatore risultati */
+    .counter {
+      font-size: 0.7rem;
+      color: var(--grigio);
+      margin-bottom: 1rem;
+      min-height: 1.2em;
+      letter-spacing: 0.05em;
+    }
+
+    /* Lista risultati */
+    #elenco {
+      list-style: none;
+      max-height: 420px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--bordo) transparent;
+    }
+
+    #elenco::-webkit-scrollbar { width: 4px; }
+    #elenco::-webkit-scrollbar-thumb { background: var(--bordo); }
+
+    #elenco li {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--bordo);
+      cursor: pointer;
+      transition: background 0.15s;
+      animation: slideIn 0.2s ease both;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    #elenco li:hover {
+      background: var(--panna);
+    }
+
+    #elenco li:last-child {
+      border-bottom: none;
+    }
+
+    .nome-comune {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .coords {
+      font-size: 0.7rem;
+      color: var(--grigio);
+      text-align: right;
+      font-style: italic;
+    }
+
+    .prov-badge {
+      display: inline-block;
+      background: var(--verde);
+      color: var(--panna);
+      font-size: 0.6rem;
+      padding: 1px 5px;
+      margin-left: 0.5rem;
+      letter-spacing: 0.1em;
+      vertical-align: middle;
+    }
+
+    /* Pannello dettaglio selezionato */
+    #dettaglio {
+      display: none;
+      margin-top: 1.5rem;
+      border-top: 2px solid var(--oro);
+      padding-top: 1.5rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #dettaglio.visible { display: block; }
+
+    #dettaglio h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--verde);
+      margin-bottom: 0.5rem;
+    }
+
+    .det-coords {
+      font-size: 0.8rem;
+      color: var(--grigio);
+      margin-bottom: 1rem;
+    }
+
+    .map-link {
+      display: inline-block;
+      background: var(--verde);
+      color: var(--panna);
+      text-decoration: none;
+      padding: 0.5rem 1.2rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .map-link:hover {
+      background: var(--verde-chiaro);
+      transform: translateY(-1px);
+    }
+
+    /* Stato vuoto */
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--grigio);
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    .empty-state.visible { display: block; }
+
+    /* Footer */
+    footer {
+      margin-top: auto;
+      padding: 1.5rem;
+      font-size: 0.65rem;
+      color: var(--grigio);
+      text-align: center;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Comuni <span>Italiani</span></h1>
+  <p>Ricerca per iniziali con tecnologia AJAX — 8.092 comuni</p>
+</header>
+<div class="stripe"></div>
+
+<div class="card">
+  <span class="label">Cerca la tua località</span>
+  <div class="input-wrap">
+    <span class="icon">⌕</span>
+    <input type="text" id="campo" placeholder="es. Bolo, Mila, Lec…" autocomplete="off" autofocus>
+  </div>
+  <div class="loading" id="loading">⟳ Ricerca in corso…</div>
+  <div class="counter" id="counter"></div>
+
+  <ul id="elenco"></ul>
+  <div class="empty-state" id="empty">Nessun comune trovato con queste iniziali.</div>
+
+  <div id="dettaglio">
+    <h3 id="det-nome"></h3>
+    <div class="det-coords" id="det-coords"></div>
+    <a class="map-link" id="det-link" href="#" target="_blank">↗ Apri su Google Maps</a>
+  </div>
+</div>
+
+<footer>Database: localita.sql · Backend: Python Flask · AJAX Fetch API</footer>
+
+<script>
+  const campo    = document.getElementById('campo');
+  const elenco   = document.getElementById('elenco');
+  const loading  = document.getElementById('loading');
+  const counter  = document.getElementById('counter');
+  const empty    = document.getElementById('empty');
+  const dettaglio = document.getElementById('dettaglio');
+
+  let debounceTimer;
+
+  campo.addEventListener('input', function() {
+    const str = this.value.trim();
+
+    // Svuota risultati se stringa corta
+    if (str.length === 0) {
+      elenco.innerHTML = '';
+      counter.textContent = '';
+      empty.classList.remove('visible');
+      dettaglio.classList.remove('visible');
+      return;
+    }
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => mostra(str), 180);
+  });
+
+  function mostra(str) {
+    loading.classList.add('visible');
+    empty.classList.remove('visible');
+
+    // Chiamata AJAX al backend Python
+    fetch('/cerca?q=' + encodeURIComponent(str))
+      .then(res => res.json())
+      .then(dati => {
+        loading.classList.remove('visible');
+        elenco.innerHTML = '';
+        dettaglio.classList.remove('visible');
+
+        if (dati.length === 0) {
+          counter.textContent = '';
+          empty.classList.add('visible');
+          return;
+        }
+
+        counter.textContent = `La select ha individuato ${dati.length} alternativa${dati.length !== 1 ? 'e' : ''}`;
+
+        dati.forEach((comune, i) => {
+          const li = document.createElement('li');
+          li.style.animationDelay = Math.min(i * 20, 200) + 'ms';
+          li.innerHTML = `
+            <div>
+              <span class="nome-comune">${comune.nome}</span>
+              <span class="prov-badge">${comune.prov}</span>
+            </div>
+            <div class="coords">${parseFloat(comune.lat).toFixed(4)}, ${parseFloat(comune.lng).toFixed(4)}</div>
+          `;
+          li.addEventListener('click', () => seleziona(comune));
+          elenco.appendChild(li);
+        });
+      })
+      .catch(() => {
+        loading.classList.remove('visible');
+        counter.textContent = 'Errore di connessione al server.';
+      });
+  }
+
+  function seleziona(comune) {
+    document.getElementById('det-nome').textContent = comune.nome;
+    document.getElementById('det-coords').textContent =
+      `Latitudine: ${comune.lat} · Longitudine: ${comune.lng} · Provincia ISTAT: ${comune.prov}`;
+    document.getElementById('det-link').href =
+      `https://www.google.com/maps?q=${comune.lat},${comune.lng}`;
+    dettaglio.classList.add('visible');
+    dettaglio.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+</script>
+</body>
+</html>
