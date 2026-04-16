@@ -1,0 +1,47 @@
+<!--Dato il seguente documento HTML:
+<html>
+<body>
+inizio documento
+<br/><div>zona di visualizzazione di source1.htm</div><br/>
+<br/><div>zona di visualizzazione di source2.htm</div><br/>
+<br/><div>zona di visualizzazione di source3.htm</div><br/>
+fine documento
+</body>
+</html>
+
+modificalo in modo da poter selezionare, tramite un menu a 3 opzioni, il caricamento asincrono dei 4 docu-
+menti HTML source1.htm, source2.htm, source3.htm, che vanno visualizzati rispettivamente all'interno del
+primo, del secondo e del terzo elemento <div>.-->
+
+<select id="loader">
+    <option value="">--Seleziona file da caricare--</option>
+    <option value="1">Carica source1.htm (primo div)</option>
+    <option value="2">Carica source2.htm (secondo div)</option>
+    <option value="3">Carica source3.htm (terzo div)</option>
+</select>
+
+<script>
+document.getElementById('loader').addEventListener('change', async function () {
+    const mapping = { '1': 'source1.htm', '2': 'source2.htm', '3': 'source3.htm' };
+    const sel = this.value;
+    if (!sel) return;
+    const url = mapping[sel];
+    try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error(resp.status + ' ' + resp.statusText);
+        const content = await resp.text();
+        const divs = Array.from(document.querySelectorAll('body > div'));
+        const idx = parseInt(sel, 10) - 1;
+        if (divs[idx]) {
+            divs[idx].innerHTML = content;
+        } else {
+            throw new Error('Div di destinazione non trovato');
+        }
+    } catch (err) {
+        alert('Errore caricamento: ' + err.message);
+    }
+});
+</script>
+
+
+

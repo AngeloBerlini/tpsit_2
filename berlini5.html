@@ -1,0 +1,115 @@
+<!--Scrivi un documento HTML che presenti due elenchi di 4 stringhe di testo ciascuno, e che permetta di caricare
+in modo asincrono, mediante posizionamento del mouse su tali stringhe, 8 diversi documenti HTML in due zone
+distinte del documento stesso (una zona per i documenti relativi alla prima lista, l'altra per i documenti relativi
+alla seconda lista).-->
+
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <title>Liste con caricamento AJAX al passaggio del mouse</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body { font-family: system-ui, Arial; margin: 20px; }
+        .container { display: flex; gap: 20px; align-items: flex-start; }
+        .lists { width: 280px; display: flex; flex-direction: column; gap: 20px; }
+        ul { list-style: none; padding: 0; margin: 0; border: 1px solid #ccc; border-radius: 6px; background:#fafafa; }
+        li { padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+        li:last-child { border-bottom: 0; }
+        li:hover { background: #eef; }
+        .zone { flex: 1; min-height: 180px; border: 1px dashed #888; padding: 10px; border-radius: 6px; background:#fff; overflow:auto; }
+        .zone-title { font-weight: 700; margin-bottom: 6px; }
+        .zone .content { min-height: 120px; }
+        .small { font-size: 0.9em; color: #666; margin-top: 6px; }
+    </style>
+</head>
+<body>
+    <h1>Due elenchi: carica documenti al passaggio del mouse</h1>
+
+    <div class="container">
+        <div class="lists">
+            <div>
+                <h2>Lista A</h2>
+                <ul data-target="zona1">
+                    <li data-url="doc1.html">Documento A1</li>
+                    <li data-url="doc2.html">Documento A2</li>
+                    <li data-url="doc3.html">Documento A3</li>
+                    <li data-url="doc4.html">Documento A4</li>
+                </ul>
+            </div>
+
+            <div>
+                <h2>Lista B</h2>
+                <ul data-target="zona2">
+                    <li data-url="doc5.html">Documento B1</li>
+                    <li data-url="doc6.html">Documento B2</li>
+                    <li data-url="doc7.html">Documento B3</li>
+                    <li data-url="doc8.html">Documento B4</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="flex:1; display:flex; flex-direction:column; gap:20px;">
+            <div id="zona1" class="zone">
+                <div class="zone-title">Zona per documenti Lista A</div>
+                <div class="content">Passa il mouse su un elemento della Lista A per caricare qui il documento.</div>
+                <div class="small">Contenuto caricato in modo asincrono </div>
+            </div>
+
+            <div id="zona2" class="zone">
+                <div class="zone-title">Zona per documenti Lista B</div>
+                <div class="content">Passa il mouse su un elemento della Lista B per caricare qui il documento.</div>
+                <div class="small">Contenuto caricato in modo asincrono </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+            const cache = {};
+            document.querySelectorAll('li[data-url]').forEach(li => {
+                li.addEventListener('mouseenter', () => {
+                    const url = li.dataset.url;
+                    const parentUl = li.closest('ul');
+                    const targetId = parentUl && parentUl.dataset.target;
+                    if (!targetId) return;
+                    const target = document.getElementById(targetId);
+                    if (!target) return;
+                    const content = target.querySelector('.content') || target;
+
+                    if (cache[url]) {
+                        content.innerHTML = cache[url];
+                        return;
+                    }
+
+                    content.innerHTML = '<p>Caricamento...</p>';
+
+                    fetch(url, { method: 'GET', credentials: 'same-origin' })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.text();
+                        })
+                        .then(text => {
+                            cache[url] = text;
+                            content.innerHTML = text;
+                        })
+                        .catch(() => {
+                            content.innerHTML = '<p>Errore nel caricamento del documento.</p>';
+                        });
+                });
+            });
+
+            document.querySelectorAll('ul[data-target]').forEach(ul => {
+                ul.addEventListener('mouseleave', () => {
+                    const targetId = ul.dataset.target;
+                    const target = document.getElementById(targetId);
+                    if (!target) return;
+                    const content = target.querySelector('.content') || target;
+                    content.innerHTML = '<p>Passa il mouse su un elemento della lista per caricare un documento.</p>';
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
+

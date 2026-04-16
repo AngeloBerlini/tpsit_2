@@ -1,0 +1,59 @@
+<!--Scrivi un documento HTML che permetta di caricare in modo asincrono, mediante posizionamento del mouse
+su due stringhe di testo, due diversi documenti HTML in due zone distinte del documento stesso.-->
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <title>Caricamento al passaggio del mouse</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:20px}
+    .trigger{color:#06c;cursor:pointer;text-decoration:underline;margin:6px 0;display:inline-block}
+    .zone{border:1px solid #ccc;padding:10px;min-height:120px;margin-top:8px;background:#f9f9f9}
+    .loading{color:#666;font-style:italic}
+    .error{color:#b00}
+  </style>
+</head>
+<body>
+  <h1>Carica al passaggio del mouse</h1>
+
+  <div>
+    <div id="tA" class="trigger" tabindex="0" role="button" aria-controls="zA">Mostra Documento A</div>
+    <div id="tB" class="trigger" tabindex="0" role="button" aria-controls="zB">Mostra Documento B</div>
+  </div>
+
+  <div id="zA" class="zone" aria-live="polite"><p class="loading">Passa il mouse su "Mostra Documento A"</p></div>
+  <div id="zB" class="zone" aria-live="polite"><p class="loading">Passa il mouse su "Mostra Documento B"</p></div>
+
+  <script>
+    const cache = new Map();
+    async function load(url, el) {
+      if (cache.has(url)) { el.innerHTML = cache.get(url); return; }
+      el.innerHTML = '<p class="loading">Caricamento...</p>';
+      try {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(r.status);
+        const text = await r.text();
+        cache.set(url, text);
+        el.innerHTML = text;
+      } catch (e) {
+        el.innerHTML = '<p class="error">Errore: ' + e.message + '</p>';
+      }
+    }
+
+    // Sostituisci con i tuoi file reali
+    const urlA = 'docA.html';
+    const urlB = 'docB.html';
+
+    const tA = document.getElementById('tA');
+    const tB = document.getElementById('tB');
+    const zA = document.getElementById('zA');
+    const zB = document.getElementById('zB');
+
+    tA.addEventListener('mouseenter', () => load(urlA, zA));
+    tB.addEventListener('mouseenter', () => load(urlB, zB));
+    tA.addEventListener('focus', () => load(urlA, zA));
+    tB.addEventListener('focus', () => load(urlB, zB));
+  </script>
+</body>
+</html>
