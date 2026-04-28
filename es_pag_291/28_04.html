@@ -1,0 +1,137 @@
+<!-- Realizza una pagina web in tecnologia AJAX che consenta di visualizzare il prezzo e le caratteristiche tecniche dei prodotti di un'azienda di informatica.
+ La pagina è costituita da un form contenente un campo di
+testo editabile dall'utente. Il campo di testo deve consentire all'utente di inserire il codice identificativo del
+prodotto di interesse. Il codice è costituito da una stringa composta da un carattere alfabetico seguito da
+tre caratteri numerici. Il form inoltre è dotato di un bottone che consente di inviare la request al server; a
+seguito della pressione del bottone la pagina deve:
+a. verificare che il codice identificativo del prodotto immesso dall'utente rispetti il formato specificato;
+b. nel caso in cui il codice identificativo del prodotto verifichi il formato specificato, ti si chiede di inserire
+sotto il form una lista puntata in cui vengano riportati prezzo e caratteristiche del prodotto cercato. Per
+semplicità assumiamo che il prodotto sia sempre presente sul server e che i dati che questi ci restituisce
+siano in formato JSON e organizzati come segue:
+
+{
+    "prezzo": 1020,
+    "marca": "Dell",
+    "modello": "XPS 13"
+}
+
+dove prezzo, marca e modello rappresentano rispettivamente il prezzo del prodotto, la sua marca e il
+suo modello. Le informazioni devono essere richieste al server in modo asincrono tramite una chiamata
+GET e passando il codice del prodotto richiesto;
+c. nel caso in cui il codice identificativo del prodotto non verifichi il formato specificato, ti si chiede che
+venga presentato un pop-up che segnali il problema all'utente.-->
+<!-- usa sto pezzo:
+<script>
+<modello> modello </modello>
+</prodotto>
+
+dove prezzo, marca e modello rappresentano rispettivamente il prezzo del prodotto, la sua marca e il
+suo modello. Le informazioni devono essere richieste al server in modo asincrono tramite una chiamata
+GET e passando il codice del prodotto richiesto;
+c. nel caso in cui il codice identificativo del prodotto non verifichi il formato specificato, ti si chiede che
+venga presentato un pop-up che segnali il problema all'utente.-->
+<!-- 
+<script>
+var text = "<valore_campo_di_testo>";
+if(!text.match(/<espr_reg>/)) {
+    alert("Codice non valido");
+} else {
+    // AJAX
+}
+</script>-->
+<!-- formato risultato:(Json)
+<ul>
+    <li>
+        <ul>
+            <li>prezzo</li>
+            <li>marca</li>
+            <li>modello</li>
+        </ul>
+    </li>
+    <li></li>
+    <li></li>
+</ul>
+-->
+
+<!--
+Breve spiegazione di quello che ho fatto: il codice HTML è strutturato con un form che contiene un campo di testo per l'inserimento del codice prodotto
+e un bottone per inviare la richiesta. Quando il form viene inviato, viene eseguita una funzione JavaScript che verifica se il codice inserito rispetta il formato specificato
+(un carattere alfabetico seguito da tre caratteri numerici).
+Se il formato è valido, viene effettuata una chiamata AJAX al server per ottenere le informazioni del prodotto in formato JSON.
+Se la risposta è positiva, viene creata una lista puntata con le informazioni del prodotto (prezzo, marca e modello) e visualizzata sotto il form.
+Se il formato del codice non è valido o se ci sono errori nella richiesta al server, viene mostrato un pop-up con un messaggio di errore.
+-->
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <title>Esercizio 4 Pagina 291</title>
+    </head>
+<body>
+    <h1>Prodotti Informatica</h1>
+    <form id="productForm">
+        <label for="productCode">Codice Prodotto:</label>
+        <input type="text" id="productCode" name="productCode" required placeholder="Esempio: A001">
+        <button type="submit">Cerca</button>
+    </form>
+    <div id="productInfo"></div>
+    <script>
+        // Funzione per creare la lista puntata con le informazioni del prodotto
+        function renderProduct(product) {
+            var outer = document.createElement('ul');
+            var li = document.createElement('li');
+            var inner = document.createElement('ul');
+
+            // Aggiungo le informazioni del prodotto come elementi della lista
+            var prezzoLi = document.createElement('li');
+            prezzoLi.textContent = 'Prezzo: ' + product.prezzo;
+            var marcaLi = document.createElement('li');
+            marcaLi.textContent = 'Marca: ' + product.marca;
+            var modelloLi = document.createElement('li');
+            modelloLi.textContent = 'Modello: ' + product.modello;
+
+            // Appendo le informazioni al DOM(Document Object Model)
+            inner.appendChild(prezzoLi);
+            inner.appendChild(marcaLi);
+            inner.appendChild(modelloLi);
+
+            li.appendChild(inner);
+            outer.appendChild(li);
+
+            return outer;
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            var productCode = document.getElementById('productCode').value.trim();
+            var productInfoDiv = document.getElementById('productInfo');
+            productInfoDiv.innerHTML = '';
+
+            if(!productCode.match(/^[A-Za-z]\d{3}$/)) {
+                alert('Codice non valido');
+                return;
+            }
+
+            try {
+                
+                var resp = await fetch('/prodotto?codice=' + encodeURIComponent(productCode));
+                if (resp.ok) {
+                    var product = await resp.json();
+                    productInfoDiv.appendChild(renderProduct(product));
+                } else if (resp.status === 400) {
+                    var err = await resp.json();
+                    alert(err.error || 'Codice non valido');
+                } else if (resp.status === 404) {
+                    var err = await resp.json();
+                    alert(err.error || 'Prodotto non trovato');
+                } else {
+                    alert('Errore nella richiesta al server: ' + resp.status);
+                }
+            } catch (e) {
+                alert('Errore di rete: ' + e.message);
+            }
+        });
+    </script>
+</body>
+</html>
