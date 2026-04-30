@@ -41,6 +41,8 @@ SAMPLE_PRODUCTS = {
     'A001': {"prezzo": 1020, "marca": "Dell", "modello": "XPS 13"},
     'A002': {"prezzo": 750, "marca": "Lenovo", "modello": "Thinkercad"},
     'A003': {"prezzo": 499, "marca": "Asus", "modello": "AsusBook"},
+    'A004': {"prezzo": 999, "marca": "Sus", "modello": "SusBuk"},
+    'A005': {"prezzo": 6767, "marca": "Marca", "modello": "Civet"},
     'A067': {"prezzo": 1200, "marca": "Apple", "modello": "MecBuck Bro"}
 }
 
