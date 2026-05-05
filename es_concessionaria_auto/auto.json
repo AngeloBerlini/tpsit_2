@@ -1,0 +1,18 @@
+[
+  {"marca":"Fiat","modello":"500","alimentazione":"benzina","colore":"rosso"},
+  {"marca":"Fiat","modello":"Panda","alimentazione":"diesel","colore":"bianco"},
+  {"marca":"Fiat","modello":"Punto","alimentazione":"benzina","colore":"blu"},
+  {"marca":"Ford","modello":"Fiesta","alimentazione":"benzina","colore":"grigio"},
+  {"marca":"Ford","modello":"Focus","alimentazione":"diesel","colore":"nero"},
+  {"marca":"Audi","modello":"A1","alimentazione":"benzina","colore":"bianco"},
+  {"marca":"Audi","modello":"A4","alimentazione":"diesel","colore":"nero"},
+  {"marca":"Volkswagen","modello":"Golf","alimentazione":"benzina","colore":"blu"},
+  {"marca":"Volkswagen","modello":"Polo","alimentazione":"benzina","colore":"rosso"},
+  {"marca":"Toyota","modello":"Yaris","alimentazione":"hybrid","colore":"verde"},
+  {"marca":"Toyota","modello":"Corolla","alimentazione":"benzina","colore":"grigio"},
+  {"marca":"Renault","modello":"Clio","alimentazione":"diesel","colore":"giallo"},
+  {"marca":"BMW","modello":"Serie1","alimentazione":"benzina","colore":"nero"},
+  {"marca":"Mercedes","modello":"A","alimentazione":"benzina","colore":"argento"},
+  {"marca":"Kia","modello":"Picanto","alimentazione":"benzina","colore":"rosa"},
+  {"marca":"Merzebby","modello":"Krastycrack","alimentazione":"bistecche","colore":"blu python"}
+]

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <title>Concessionaria - Cerca auto usate</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Ricerca auto usate</h1>
+        <form id="searchForm">
+            <label>Marca: <input type="text" name="marca" id="marca"></label>
+            <label>Modello: <input type="text" name="modello" id="modello"></label>
+            <label>Alimentazione:
+                <select name="alimentazione" id="alimentazione">
+                    <option value="">-- qualsiasi --</option>
+                    <option>diesel</option>
+                    <option>benzina</option>
+                    <option>hybrid</option>
+                    <option>elettrico</option>
+                </select>
+            </label>
+            <label>Colore: <input type="text" name="colore" id="colore"></label>
+            <button type="submit">Cerca</button>
+        </form>
+
+        <div id="status"></div>
+        <div id="results"></div>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
