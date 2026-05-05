@@ -1,33 +1,160 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="utf-8">
-    <title>Concessionaria - Cerca auto usate</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <meta charset="UTF-8">
+    <title>Concessionaria Auto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #333; text-align: center; }
+        .form-box {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th {
+            background: #007bff;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover { background: #f9f9f9; }
+        #risultati { display: none; margin-top: 20px; }
+        .nessuno {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <main class="container">
-        <h1>Ricerca auto usate</h1>
-        <form id="searchForm">
-            <label>Marca: <input type="text" name="marca" id="marca"></label>
-            <label>Modello: <input type="text" name="modello" id="modello"></label>
-            <label>Alimentazione:
-                <select name="alimentazione" id="alimentazione">
-                    <option value="">-- qualsiasi --</option>
-                    <option>diesel</option>
-                    <option>benzina</option>
-                    <option>hybrid</option>
-                    <option>elettrico</option>
-                </select>
-            </label>
-            <label>Colore: <input type="text" name="colore" id="colore"></label>
-            <button type="submit">Cerca</button>
-        </form>
+    <h1>🚗 Concessionaria Auto Usate</h1>
+    
+    <div class="form-box">
+        <div>
+            <label>Marca:</label>
+            <input type="text" id="marca" placeholder="Fiat, Ford, Audi...">
+        </div>
+        <div>
+            <label>Modello:</label>
+            <input type="text" id="modello" placeholder="500, Fiesta, A1...">
+        </div>
+        <div>
+            <label>Alimentazione:</label>
+            <select id="alimentazione">
+                <option value="">-- Tutti --</option>
+                <option>benzina</option>
+                <option>diesel</option>
+                <option>hybrid</option>
+            </select>
+        </div>
+        <div>
+            <label>Colore:</label>
+            <input type="text" id="colore" placeholder="rosso, nero, blu...">
+        </div>
+        <div style="text-align: center;">
+            <button onclick="cerca()">Cerca</button>
+            <button onclick="pulisci()" style="background: #6c757d;">Pulisci</button>
+        </div>
+    </div>
 
-        <div id="status"></div>
-        <div id="results"></div>
-    </main>
+    <div id="risultati">
+        <table id="tabella">
+            <thead>
+                <tr>
+                    <th>Marca</th>
+                    <th>Modello</th>
+                    <th>Alimentazione</th>
+                    <th>Colore</th>
+                    <th>Immagine</th>
+                </tr>
+            </thead>
+            <tbody id="corpo">
+            </tbody>
+        </table>
+        <div class="nessuno" id="nessuno" style="display: none;">
+            Nessuna auto trovata!
+        </div>
+    </div>
 
-    <script src="/static/js/app.js"></script>
+    <script>
+        function cerca() {
+            const marca = document.getElementById('marca').value;
+            const modello = document.getElementById('modello').value;
+            const alimentazione = document.getElementById('alimentazione').value;
+            const colore = document.getElementById('colore').value;
+
+            const url = `/api/filtra?marca=${encodeURIComponent(marca)}&modello=${encodeURIComponent(modello)}&alimentazione=${encodeURIComponent(alimentazione)}&colore=${encodeURIComponent(colore)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(dati => {
+                    const corpo = document.getElementById('corpo');
+                    corpo.innerHTML = '';
+
+                    if (dati.length === 0) {
+                        document.getElementById('nessuno').style.display = 'block';
+                        document.getElementById('tabella').style.display = 'none';
+                    } else {
+                        document.getElementById('nessuno').style.display = 'none';
+                        document.getElementById('tabella').style.display = 'table';
+                        
+                        dati.forEach(auto => {
+                            const riga = `<tr>
+                                <td>${auto.marca}</td>
+                                <td>${auto.modello}</td>
+                                <td>${auto.alimentazione}</td>
+                                <td>${auto.colore}</td>
+                                <td>${auto.immagine}</td>
+                            </tr>`;
+                            corpo.innerHTML += riga;
+                        });
+                    }
+                    document.getElementById('risultati').style.display = 'block';
+                })
+                .catch(err => alert('Errore: ' + err));
+        }
+
+        function pulisci() {
+            document.getElementById('marca').value = '';
+            document.getElementById('modello').value = '';
+            document.getElementById('alimentazione').value = '';
+            document.getElementById('colore').value = '';
+            document.getElementById('risultati').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
