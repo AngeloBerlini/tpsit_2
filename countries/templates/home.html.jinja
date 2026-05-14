@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>COUNTRIES SOAP SERVICES</title>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <h1>COUNTRIES SOAP SERVICES</h1>
+        {% if response or result %}
+        <h2>SOAP RESPONSE</h2>
+        <div class="response">
+            {% if response %}
+                {% if response is mapping %}
+                    <ul>
+                    {% for k, v in response.items() %}
+                        <li><strong>{{ k }}:</strong> {{ v }}</li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <div>{{ response }}</div>
+                {% endif %}
+            {% else %}
+                {{ result }}
+            {% endif %}
+        </div>
+        <p><a href="/">Nuova richiesta</a></p>
+        {% else %}
+        <h2>SOAP REQUEST</h2>
+        <div class="request">
+            <form method="POST">
+                <label for="isocode">CODICE ISO</label>
+                <input type="text" name="isocode" />
+                <label for="service">Servizio</label>
+                <select name="service">
+                    <option>CapitalCity</option>
+                    <option>CountryIntPhoneCode</option>
+                    <option>FullCountryInfo</option>
+                </select>
+                <button type="submit">invia</button>
+            </form>
+        </div>
+        <div class="oplist">Servizi disponibili -> {{ oplist }}</div>
+            {% if countries %}
+            <table border="1" cellspacing="0" cellpadding="4">
+                <tr><th>ISO CODE</th><th>Country</th></tr>
+            {% for country in countries %}
+                <tr>
+                    <td>{{ country.sISOCode }}</td><td>{{ country.sName }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+            {% endif %}
+        {% endif %}
+    </body>
+</html>
