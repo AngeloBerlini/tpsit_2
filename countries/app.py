@@ -25,19 +25,14 @@ def load():
             if not isocode:
                 result = "Fill in the ISO code"
             else:
-                # dispatch to one of the service calls
                 try:
                     if service_name == "CapitalCity":
                         response = client.service.CapitalCity(sCountryISOCode=isocode)
                     elif service_name == "CountryIntPhoneCode":
                         response = client.service.CountryIntPhoneCode(sCountryISOCode=isocode)
                     elif service_name == "FullCountryInfo":
-                        # FullCountryInfo returns a complex object; convert to a dict-like representation
                         info = client.service.FullCountryInfo(sCountryISOCode=isocode)
-                        # zeep objects can be converted to python dict via _asdict() or by accessing attributes
-                        # build a simple dict for template rendering
                         response = {}
-                        # safe attribute access
                         for attr in [
                             "sISOCode",
                             "sName",
@@ -58,7 +53,6 @@ def load():
             return render_template("home.html.jinja", response=response, result=result)
         else:
             response = getAllISOCodes(client)
-            # discover available methods
             oplist = []
             for service in client.wsdl.services.values():
                 for port in service.ports.values():
